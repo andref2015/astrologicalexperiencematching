@@ -1,34 +1,27 @@
 import numpy as np
-from itertools import combinations
 import pandas as pd
+from itertools import combinations
 
-# Load the data from the uploaded CSV file
-file_path = 'data.csv'
-data = pd.read_csv(file_path)
+data = pd.read_csv('data.csv')
 
-# Group the data by astrological experience level
-grouped = data.groupby('astrological_experience')
-
-# Calculate the matching percentage of responses for two random participants in each group
 results = {}
 
-for level, group in grouped:
-  random_pairs = list(combinations(group.index, 2))  # Create all possible pairs
-  match_percentages = []
+groups = data.groupby('astrological_experience')
 
-  for pair in random_pairs:
-    participant_1 = group.loc[pair[0], 'answer1':'answer12']
-    participant_2 = group.loc[pair[1], 'answer1':'answer12']
-    match_count = np.sum(participant_1 == participant_2)
-    match_percentage = (match_count / 12) * 100
-    match_percentages.append(match_percentage)
+for experience_level, group in groups:
+	all_combinations = list(combinations(group.index, 2))
+	match_percentages = []
 
-  average_match_percentage = np.mean(match_percentages)
-  results[level] = average_match_percentage
+	for pair in all_combinations:
+		participant_1 = group.loc[pair[0]]["answer1":"answer12"]
+		participant_2 = group.loc[pair[1]]["answer1":"answer12"]
+		answers_in_common = np.sum(participant_1 == participant_2)
+		percent_in_common = answers_in_common / 12 * 100
+		match_percentages.append(percent_in_common)
 
-# Print the results
-exp_level = 0
-for level in results:
-	rounded_agreement_level = round(results[level], 1)
-  print(f"{exp_level}: {rounded_agreement_level}%")
-  exp_level += 1
+	average_match_percentage = np.mean(match_percentages)
+	results[experience_level] = average_match_percentage
+
+for result in results:
+	rounded_result = round(results[result], 1)
+	print(f"Group {result}: {rounded_result}%")
